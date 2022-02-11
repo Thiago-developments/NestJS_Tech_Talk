@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Produto } from "./produto.model";
 
@@ -19,6 +19,14 @@ export class ProdutosService {
     }
 
     async criar(produto:Produto){
+        const existingProduct = await this.produtoModel.findOne({
+            where: { nome: produto.nome }
+        })
+        if (existingProduct) {
+            throw new HttpException({
+                error: 'Já existe um produto com o mesmo nome',
+            }, HttpStatus.BAD_REQUEST);
+        }
        return this.produtoModel.create(produto)
     }
 
